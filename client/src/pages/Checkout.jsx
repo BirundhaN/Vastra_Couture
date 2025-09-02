@@ -1,0 +1,141 @@
+// src/pages/Checkout.jsx
+import React, { useState } from "react";
+import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
+
+export default function Checkout() {
+  const { cart, clearCart } = useCart();
+  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    payment: "cod", // default
+  });
+
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handlePlaceOrder = () => {
+    if (!form.name || !form.email || !form.phone || !form.address) {
+      alert("⚠️ Please fill all details before placing the order!");
+      return;
+    }
+
+    clearCart();
+    // Redirect to home with success message
+    navigate("/", { state: { orderSuccess: true, name: form.name } });
+  };
+
+  return (
+    <div className="p-8 bg-gradient-to-br from-green-50 to-teal-100 min-h-screen">
+      <h2 className="text-3xl font-extrabold mb-8 text-center text-teal-800">
+        🛒 Checkout
+      </h2>
+
+      <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
+        {/* Left - Shipping Details */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">
+            Shipping Details
+          </h3>
+          <form className="space-y-4">
+            <input
+              type="text"
+              name="name"
+              placeholder="Full Name"
+              value={form.name}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-teal-500"
+            />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email Address"
+              value={form.email}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-teal-500"
+            />
+            <input
+              type="tel"
+              name="phone"
+              placeholder="Phone Number"
+              value={form.phone}
+              onChange={handleChange}
+              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-teal-500"
+            />
+            <textarea
+              name="address"
+              placeholder="Shipping Address"
+              value={form.address}
+              onChange={handleChange}
+              rows="3"
+              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-teal-500"
+            ></textarea>
+
+            <h3 className="text-lg font-semibold mt-6">Payment Method</h3>
+            <div className="space-y-2">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="payment"
+                  value="cod"
+                  checked={form.payment === "cod"}
+                  onChange={handleChange}
+                />
+                <span>Cash on Delivery</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="payment"
+                  value="upi"
+                  checked={form.payment === "upi"}
+                  onChange={handleChange}
+                />
+                <span>UPI / Card</span>
+              </label>
+            </div>
+          </form>
+        </div>
+
+        {/* Right - Order Summary */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h3 className="text-xl font-semibold mb-4 text-gray-800">
+            Order Summary
+          </h3>
+          <div className="space-y-4">
+            {cart.map((item) => (
+              <div
+                key={item.id}
+                className="flex justify-between items-center border-b pb-2"
+              >
+                <span>
+                  {item.name} × {item.quantity}
+                </span>
+                <span className="font-semibold text-teal-700">
+                  ₹{item.price * item.quantity}
+                </span>
+              </div>
+            ))}
+          </div>
+          <h3 className="text-2xl font-bold mt-6 text-gray-800">
+            Total: <span className="text-green-700">₹{total}</span>
+          </h3>
+
+          <button
+            onClick={handlePlaceOrder}
+            className="w-full mt-6 bg-gradient-to-r from-teal-500 to-green-600 text-white py-3 rounded-xl hover:opacity-90 shadow-lg"
+          >
+            ✅ Place Order
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -2,8 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";   // for authentication
 import { useCart } from "../context/CartContext";   // for cart
-// 🛒 Import cart
-import { FaShoppingCart } from "react-icons/fa";
+import { FaShoppingCart } from "react-icons/fa";    // 🛒 cart icon
 
 function Navbar() {
   const { currentUser, logout } = useAuth();
@@ -13,9 +12,16 @@ function Navbar() {
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <nav className="bg-[#0A122A] text-white px-6 py-4 flex justify-between items-center shadow-md">
-      {/* Logo */}
-      <h1 className="text-xl font-bold">Vastra Couture</h1>
+    <nav className="bg-[#0f172a] text-white px-6 py-4 flex justify-between items-center shadow-md">
+      {/* 🛍️ Brand/Logo */}
+      <Link to="/" className="flex items-center gap-2">
+        <div className="bg-white p-1.5 rounded-full shadow-md">
+          <span className="text-xl">🛍️</span>
+        </div>
+        <span className="text-2xl font-bold tracking-wide">
+          Vastra <span className="text-yellow-300">Couture</span>
+        </span>
+      </Link>
 
       {/* Links */}
       <div className="flex items-center space-x-6">
