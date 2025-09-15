@@ -9,6 +9,7 @@ import Cart from "./pages/Cart";
 import "./index.css";
 import Home from "./pages/Home";
 import Checkout from "./pages/Checkout";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   return (
@@ -21,7 +22,7 @@ function App() {
         <Route path="/products" element={<Products />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
-
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </Router>
   );

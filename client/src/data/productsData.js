@@ -1,4 +1,19 @@
 // src/data/productsData.js
+
+// 🔽 Import images from src/assets
+import chudithar from "../assets/Chudithar.jpg";
+import deniumjeans from "../assets/deniumjeans.webp";
+import formalshirt from "../assets/formalshirt.avif";
+import frocks from "../assets/frocks.jpeg";
+import muhurthamsaree from "../assets/muhurthamsaree.jpg";
+import nightsuit from "../assets/Nightsuit.jpg";
+import sharara from "../assets/sharara.webp";
+import shara from "../assets/shara.jpg";
+import SilkSaree from "../assets/SilkSaree.jpg";
+import tablelamp from "../assets/table lamp.jpeg";
+import tshirtshorts from "../assets/tshirtshorts.webp";
+import wallhanging from "../assets/wallhanging.jpeg";
+
 const products = [
   // WOMEN
   {
@@ -7,7 +22,7 @@ const products = [
     price: 3000,
     category: "Women",
     subcategory: "Sarees",
-    image: "/images/silk-saree.jpg",
+    image: SilkSaree,
     offer: 25,
     rating: 4.6,
     reviews: 152,
@@ -18,7 +33,7 @@ const products = [
     price: 1500,
     category: "Women",
     subcategory: "Chudithars",
-    image: "/images/chudithar.jpg",
+    image: chudithar,
     offer: 15,
     rating: 4.3,
     reviews: 98,
@@ -29,7 +44,7 @@ const products = [
     price: 800,
     category: "Women",
     subcategory: "Night Suits",
-    image: "/images/night-suit.jpg",
+    image: nightsuit,
     offer: 10,
     rating: 4.2,
     reviews: 65,
@@ -40,7 +55,7 @@ const products = [
     price: 5000,
     category: "Women",
     subcategory: "Muhurtham Sarees",
-    image: "/images/muhurtham-saree.jpg",
+    image: muhurthamsaree,
     offer: 30,
     rating: 4.8,
     reviews: 210,
@@ -51,7 +66,7 @@ const products = [
     price: 2500,
     category: "Women",
     subcategory: "Sharara",
-    image: "/images/sharara.jpg",
+    image: sharara,
     offer: 20,
     rating: 4.4,
     reviews: 134,
@@ -64,7 +79,7 @@ const products = [
     price: 1200,
     category: "Men",
     subcategory: "Shirts",
-    image: "/images/shirt.jpg",
+    image: formalshirt,
     offer: 18,
     rating: 4.1,
     reviews: 72,
@@ -75,7 +90,7 @@ const products = [
     price: 2000,
     category: "Men",
     subcategory: "Jeans",
-    image: "/images/jeans.jpg",
+    image: deniumjeans,
     offer: 22,
     rating: 4.5,
     reviews: 150,
@@ -88,7 +103,7 @@ const products = [
     price: 900,
     category: "Kids",
     subcategory: "Girls",
-    image: "/images/frock.jpg",
+    image: frocks,
     offer: 12,
     rating: 4.7,
     reviews: 98,
@@ -99,7 +114,7 @@ const products = [
     price: 700,
     category: "Kids",
     subcategory: "Boys",
-    image: "/images/kids-tshirt.jpg",
+    image: tshirtshorts,
     offer: 10,
     rating: 4.4,
     reviews: 88,
@@ -112,7 +127,7 @@ const products = [
     price: 1500,
     category: "Home Decors",
     subcategory: "Wall Decor",
-    image: "/images/wall-hanging.jpg",
+    image: wallhanging,
     offer: 28,
     rating: 4.6,
     reviews: 112,
@@ -123,10 +138,21 @@ const products = [
     price: 1800,
     category: "Home Decors",
     subcategory: "Lighting",
-    image: "/images/lamp.jpg",
+    image: tablelamp,
     offer: 20,
     rating: 4.5,
     reviews: 76,
+  },
+  {
+    id: 12,
+    name: "Shara Special",
+    price: 2000,
+    category: "Women",
+    subcategory: "Special",
+    image: shara,
+    offer: 12,
+    rating: 4.2,
+    reviews: 45,
   },
 ];
 

@@ -2,11 +2,13 @@
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
-import { db } from "../firebase"; 
+import { db } from "../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useAuth } from "../context/AuthContext"; // ✅ get logged-in user
 
 export default function Checkout() {
   const { cart, clearCart } = useCart();
+  const { currentUser } = useAuth(); // ✅ access user
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const [form, setForm] = useState({
@@ -33,12 +35,18 @@ export default function Checkout() {
       return;
     }
 
+    if (!currentUser) {
+      alert("⚠️ You must be logged in to place an order!");
+      return;
+    }
+
     try {
       // Generate random OTP
       const otp = Math.floor(100000 + Math.random() * 900000);
 
-      // Save order into Firestore
+      // ✅ Save order into Firestore with customerId
       const docRef = await addDoc(collection(db, "orders"), {
+        customerId: currentUser.uid, // 🔑 needed for Firestore rules
         customer: {
           name: form.name,
           email: form.email,
@@ -49,11 +57,11 @@ export default function Checkout() {
         total: total,
         paymentMethod: form.payment,
         otp: otp,
-        status: "pending", // later we’ll update to "delivered"
+        status: "pending", // later update to "delivered"
         createdAt: serverTimestamp(),
       });
 
-      console.log("Order stored with ID:", docRef.id);
+      console.log("✅ Order stored with ID:", docRef.id);
 
       clearCart();
       navigate("/", {

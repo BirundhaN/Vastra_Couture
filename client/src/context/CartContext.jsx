@@ -1,12 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { db } from "../firebase";
 import { useAuth } from "./AuthContext";
-import {
-  doc,
-  getDoc,
-  setDoc,
-  onSnapshot,
-} from "firebase/firestore";
+import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 
 const CartContext = createContext();
 export const useCart = () => useContext(CartContext);
@@ -21,7 +16,6 @@ export function CartProvider({ children }) {
 
   // 🔄 Load cart on login & keep it in sync
   useEffect(() => {
-    // Logged out → clear state & stop loading
     if (!currentUser) {
       setCart([]);
       setLoadingCart(false);
@@ -31,45 +25,70 @@ export function CartProvider({ children }) {
     setLoadingCart(true);
     const cartRef = doc(db, "carts", currentUser.uid);
 
-    // 1) Instant hydration from localStorage (optional but removes flicker)
-    const cached = localStorage.getItem(cartKey);
-    if (cached) {
-      try {
-        setCart(JSON.parse(cached));
-      } catch (_) {}
+    // 1) Hydrate instantly from localStorage
+    if (cartKey) {
+      const cached = localStorage.getItem(cartKey);
+      if (cached) {
+        try {
+          setCart(JSON.parse(cached));
+        } catch (err) {
+          console.error("❌ Error parsing cached cart:", err);
+        }
+      }
     }
 
-    // 2) Ensure doc exists, then subscribe
-    (async () => {
-      const snap = await getDoc(cartRef);
-      if (!snap.exists()) {
-        await setDoc(cartRef, { items: [] });
-      }
-      // 3) Real-time updates
-      const unsub = onSnapshot(cartRef, (docSnap) => {
-        const items = (docSnap.data() && docSnap.data().items) || [];
-        setCart(items);
-        localStorage.setItem(cartKey, JSON.stringify(items));
-        setLoadingCart(false);
-      }, (err) => {
-        console.error("Cart onSnapshot error:", err);
-        setLoadingCart(false);
-      });
+    let unsub = null;
 
-      // Cleanup on unmount or user change
-      return unsub;
+    // 2) Ensure Firestore doc exists and subscribe
+    (async () => {
+      try {
+        const snap = await getDoc(cartRef);
+        if (!snap.exists()) {
+          await setDoc(cartRef, { items: [] });
+        }
+
+        unsub = onSnapshot(
+          cartRef,
+          (docSnap) => {
+            const items = (docSnap.data() && docSnap.data().items) || [];
+            setCart(items);
+            if (cartKey) {
+              localStorage.setItem(cartKey, JSON.stringify(items));
+            }
+            setLoadingCart(false);
+          },
+          (err) => {
+            console.error("❌ Cart onSnapshot error:", err);
+            setLoadingCart(false);
+          }
+        );
+      } catch (err) {
+        console.error("❌ Error setting up cart listener:", err);
+        setLoadingCart(false);
+      }
     })();
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser]);
+    // ✅ Proper cleanup
+    return () => {
+      if (unsub) unsub();
+    };
+  }, [currentUser, cartKey]);
 
+  // 🔄 Save cart to Firestore + localStorage
   const save = async (items) => {
     if (!currentUser) return;
-    const cartRef = doc(db, "carts", currentUser.uid);
-    localStorage.setItem(cartKey, JSON.stringify(items));
-    await setDoc(cartRef, { items }, { merge: true });
+    if (cartKey) {
+      localStorage.setItem(cartKey, JSON.stringify(items));
+    }
+    try {
+      const cartRef = doc(db, "carts", currentUser.uid);
+      await setDoc(cartRef, { items }, { merge: true });
+    } catch (err) {
+      console.error("❌ Error saving cart:", err);
+    }
   };
 
+  // 🔽 Cart operations
   const addToCart = (product) => {
     setCart((prev) => {
       const exist = prev.find((i) => i.id === product.id);
@@ -116,13 +135,23 @@ export function CartProvider({ children }) {
     if (currentUser) {
       const cartRef = doc(db, "carts", currentUser.uid);
       setDoc(cartRef, { items: [] }, { merge: true });
-      localStorage.setItem(cartKey, JSON.stringify([]));
+      if (cartKey) {
+        localStorage.setItem(cartKey, JSON.stringify([]));
+      }
     }
   };
 
   return (
     <CartContext.Provider
-      value={{ cart, loadingCart, addToCart, removeFromCart, increaseQty, decreaseQty, clearCart }}
+      value={{
+        cart,
+        loadingCart,
+        addToCart,
+        removeFromCart,
+        increaseQty,
+        decreaseQty,
+        clearCart,
+      }}
     >
       {children}
     </CartContext.Provider>

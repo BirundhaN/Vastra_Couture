@@ -106,7 +106,7 @@ function Products() {
       </div>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 w-full">
         {filteredProducts.map((product) => {
           const discountPrice = product.offer
             ? Math.round(product.price - (product.price * product.offer) / 100)
@@ -126,10 +126,11 @@ function Products() {
 
               {/* Product Image */}
               <img
-                src={product.image}
-                alt={product.name}
-                className="h-40 w-full object-contain mb-4 rounded-lg"
-              />
+  src={product.image}
+  alt={product.name}
+  className="w-full h-72 object-cover mb-4 rounded-lg"
+/>
+
 
               {/* Name */}
               <h3 className="font-bold text-lg text-purple-700">
