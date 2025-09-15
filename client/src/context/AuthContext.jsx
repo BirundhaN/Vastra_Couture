@@ -1,6 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 import { auth } from "../firebase";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  signOut,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from "firebase/auth";
 
 const AuthContext = React.createContext();
 
@@ -15,8 +20,8 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        await user.reload(); // ✅ force refresh from Firebase server
-        setCurrentUser(auth.currentUser); // ✅ use latest user object
+        await user.reload(); // ✅ force refresh
+        setCurrentUser(auth.currentUser);
         console.log("Auth user:", auth.currentUser);
       } else {
         setCurrentUser(null);
@@ -27,12 +32,23 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
+  // 🔹 Authentication helpers
+  function signup(email, password) {
+    return createUserWithEmailAndPassword(auth, email, password);
+  }
+
+  function login(email, password) {
+    return signInWithEmailAndPassword(auth, email, password);
+  }
+
   function logout() {
     return signOut(auth);
   }
 
   const value = {
     currentUser,
+    signup,
+    login,
     logout,
   };
 

@@ -2,6 +2,8 @@
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import { db } from "../firebase"; 
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 export default function Checkout() {
   const { cart, clearCart } = useCart();
@@ -13,6 +15,10 @@ export default function Checkout() {
     phone: "",
     address: "",
     payment: "cod", // default
+    upiId: "",
+    cardNumber: "",
+    expiry: "",
+    cvv: "",
   });
 
   const navigate = useNavigate();
@@ -21,15 +27,46 @@ export default function Checkout() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!form.name || !form.email || !form.phone || !form.address) {
       alert("⚠️ Please fill all details before placing the order!");
       return;
     }
 
-    clearCart();
-    // Redirect to home with success message
-    navigate("/", { state: { orderSuccess: true, name: form.name } });
+    try {
+      // Generate random OTP
+      const otp = Math.floor(100000 + Math.random() * 900000);
+
+      // Save order into Firestore
+      const docRef = await addDoc(collection(db, "orders"), {
+        customer: {
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          address: form.address,
+        },
+        cart: cart,
+        total: total,
+        paymentMethod: form.payment,
+        otp: otp,
+        status: "pending", // later we’ll update to "delivered"
+        createdAt: serverTimestamp(),
+      });
+
+      console.log("Order stored with ID:", docRef.id);
+
+      clearCart();
+      navigate("/", {
+        state: {
+          orderSuccess: true,
+          name: form.name,
+          orderId: docRef.id,
+        },
+      });
+    } catch (err) {
+      console.error("❌ Error placing order:", err);
+      alert("Something went wrong. Please try again.");
+    }
   };
 
   return (
@@ -78,6 +115,7 @@ export default function Checkout() {
               className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-teal-500"
             ></textarea>
 
+            {/* Payment Method */}
             <h3 className="text-lg font-semibold mt-6">Payment Method</h3>
             <div className="space-y-2">
               <label className="flex items-center space-x-2">
@@ -101,6 +139,43 @@ export default function Checkout() {
                 <span>UPI / Card</span>
               </label>
             </div>
+
+            {form.payment === "upi" && (
+              <div className="mt-4 space-y-3">
+                <input
+                  type="text"
+                  name="upiId"
+                  value={form.upiId}
+                  onChange={handleChange}
+                  placeholder="Enter UPI ID (e.g. name@upi)"
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-teal-500"
+                />
+                <input
+                  type="text"
+                  name="cardNumber"
+                  value={form.cardNumber}
+                  onChange={handleChange}
+                  placeholder="Enter Card Number"
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-teal-500"
+                />
+                <input
+                  type="text"
+                  name="expiry"
+                  value={form.expiry}
+                  onChange={handleChange}
+                  placeholder="Expiry Date (MM/YY)"
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-teal-500"
+                />
+                <input
+                  type="password"
+                  name="cvv"
+                  value={form.cvv}
+                  onChange={handleChange}
+                  placeholder="CVV"
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-teal-500"
+                />
+              </div>
+            )}
           </form>
         </div>
 
